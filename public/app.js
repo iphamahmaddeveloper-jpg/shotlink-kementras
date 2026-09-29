@@ -156,7 +156,16 @@ async function handleLogin(e) {
             btn.innerHTML = '<span>Masuk</span> <i class="fa-solid fa-arrow-right text-xs"></i>';
             return;
         }
-        await checkAuth();
+        // Langsung set currentUser dari response login tanpa round-trip ke /api/me
+        currentUser = {
+            loggedIn: true,
+            username: $('login-username').value.trim().toLowerCase(),
+            name: data.name || $('login-username').value.trim(),
+            instansi: data.instansi || '',
+            role: data.isAdmin ? 'superadmin' : 'user',
+            isAdmin: !!data.isAdmin
+        };
+        showMainApp();
         showToast('Berhasil masuk ke portal!');
     } catch {
         errorEl.textContent = 'Terjadi gangguan koneksi ke server.';
@@ -166,6 +175,7 @@ async function handleLogin(e) {
         btn.innerHTML = '<span>Masuk</span> <i class="fa-solid fa-arrow-right text-xs"></i>';
     }
 }
+
 
 async function handleLogout() {
     await api('/api/logout', { method: 'POST' });

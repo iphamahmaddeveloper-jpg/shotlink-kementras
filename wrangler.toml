@@ -1,11 +1,23 @@
-# Nama project Cloudflare Pages. Ganti kalau deploy ke akun/project baru.
+# Nama project Cloudflare Worker.
 name = "shotlink-kementras"
 compatibility_date = "2026-09-26"
 
-# Ganti id dengan KV namespace di akun Cloudflare yang dipakai.
-# Bikin lewat dashboard (Workers & Pages > KV) atau: npx wrangler kv namespace create LINKS
 [assets]
 directory = "./public"
 
-# Variable ADMIN_USERNAMES dan ALLOW_REGISTRATION diisi lewat dashboard:
-# Pages > Settings > Variables and Secrets. Lihat README.
+# ============================================================
+# WAJIB: Ganti "NAMESPACE_ID_KAMU" dengan ID KV namespace yang
+# sudah dibuat. Cara buat:
+#   npx wrangler kv namespace create LINKS --remote
+# Lalu copy ID-nya ke bawah ini.
+# ============================================================
+[[kv_namespaces]]
+binding = "LINKS"
+id = "3fe80920bc094c1dbb31424170300420"
+
+# Variable env (opsional). Bisa juga diatur lewat Cloudflare Dashboard:
+# Workers & Pages > shotlink-kementras > Settings > Variables and Secrets
+#
+# [vars]
+# ADMIN_USERNAMES = "admin"
+# ALLOW_REGISTRATION = "false"

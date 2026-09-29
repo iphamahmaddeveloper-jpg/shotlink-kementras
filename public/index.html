@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="id" class="overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shorten Link Transmigrasi - Portal Resmi</title>
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .auth-bg {
+            background-color: #0a2a3d;
+            background-image:
+                radial-gradient(circle at 15% 15%, rgba(212, 175, 90, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(20, 90, 110, 0.4) 0%, transparent 50%),
+                linear-gradient(160deg, #0a2a3d 0%, #0d3b4f 100%);
+        }
+        .main-bg { background: #f8fafc; }
+        .subtitle-caps {
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .hidden { display: none !important; }
+        .admin-tab { padding: 0.5rem 1.25rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.15s; border: 1.5px solid rgba(226, 232, 240, 0.8); background: white; color: #64748b; }
+        .admin-tab:hover { border-color: #004d40; color: #004d40; }
+        .admin-tab.active { background: #004d40; color: #fff; border-color: #004d40; box-shadow: 0 4px 12px rgba(0, 77, 64, 0.2); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 antialiased selection:bg-teal-100 selection:text-teal-900 overflow-x-hidden">
+
+    <!-- ==================== HALAMAN LOGIN ==================== -->
+    <div id="auth-screen" class="auth-bg flex-grow flex flex-col min-h-screen">
+        <!-- Header Login -->
+        <div class="relative z-10 bg-black/30 backdrop-blur-sm border-b border-white/10">
+            <div class="px-6 sm:px-10 py-4 flex items-center gap-4">
+                <div class="relative shrink-0">
+                    <div class="absolute inset-0 rounded-xl bg-[#d4af5a]/20 blur-lg"></div>
+                    <img src="logo.jpg" alt="Logo" class="relative w-11 h-11 rounded-xl object-cover border-2 border-[#d4af5a]/30 shadow-xl" onerror="this.style.display='none'">
+                </div>
+                <div>
+                    <p class="text-white text-sm sm:text-base font-extrabold leading-tight">Kementerian <span class="text-[#d4af5a]">Transmigrasi</span></p>
+                    <p class="text-teal-200/60 text-[10px] font-bold subtitle-caps">Republik Indonesia</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Login Card -->
+        <div class="flex-grow flex items-center justify-center px-4 py-10">
+            <div class="w-full max-w-md">
+                <div class="flex flex-col items-center mb-6">
+                    <div class="relative mb-4">
+                        <div class="absolute inset-0 rounded-full bg-teal-400/15 blur-2xl scale-125"></div>
+                        <div class="absolute inset-0 rounded-full bg-[#d4af5a]/10 blur-xl scale-110"></div>
+                        <img src="logo.jpg" alt="Logo KemenTrans" class="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full object-cover ring-2 ring-[#d4af5a]/40 shadow-2xl" onerror="this.src='https://placehold.co/160x160?text=Logo'">
+                    </div>
+                    <h1 class="text-2xl sm:text-[1.75rem] font-extrabold text-white text-center leading-tight tracking-tight">Shorten Link Transmigrasi</h1>
+                    <div class="w-12 h-0.5 bg-teal-400/40 rounded-full mt-2.5 mb-1.5"></div>
+                    <p class="text-[11px] text-teal-100/60 text-center subtitle-caps">Portal Resmi Internal Kementerian Transmigrasi</p>
+                </div>
+
+                <div class="bg-white/95 backdrop-blur-xl rounded-[2rem] p-7 sm:p-8 shadow-[0_25px_60px_-12px_rgba(0,0,0,0.35)] border border-white/20">
+                    <form onsubmit="handleLogin(event)" class="space-y-4">
+                        <div class="text-center mb-2">
+                            <h2 class="text-sm font-extrabold text-slate-900">Masuk ke Portal Resmi</h2>
+                            <p class="text-[11px] text-slate-400 mt-0.5">Gunakan akun yang telah didaftarkan oleh Super Admin</p>
+                        </div>
+                        
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">Username</label>
+                            <div class="relative">
+                                <input type="text" id="login-username" required autocomplete="username" class="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white transition-all font-medium">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-user text-xs"></i></div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <div class="flex items-center justify-between">
+                                <label class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">Password</label>
+                                <button type="button" onclick="togglePasswordVisibility('login-password', 'login-pwd-icon')" class="text-[10px] text-teal-700 hover:underline font-semibold flex items-center gap-1">
+                                    <i id="login-pwd-icon" class="fa-regular fa-eye"></i> <span id="login-pwd-text">Lihat</span>
+                                </button>
+                            </div>
+                            <div class="relative">
+                                <input type="password" id="login-password" required autocomplete="current-password" class="w-full pl-10 pr-10 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white transition-all font-medium">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-lock text-xs"></i></div>
+                            </div>
+                        </div>
+
+                        <p id="login-error" class="text-xs text-red-600 bg-red-50 p-3 rounded-xl border border-red-200 hidden leading-relaxed"></p>
+
+                        <button type="submit" id="login-btn" class="w-full py-3 bg-[#004d40] hover:bg-[#00332c] text-white font-bold rounded-xl transition text-sm shadow-lg shadow-teal-900/20 mt-3 flex items-center justify-center gap-2">
+                            <span>Masuk</span> <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Login -->
+        <div class="shrink-0 bg-black/25 backdrop-blur-sm border-t border-white/10 py-6 px-6">
+            <div class="max-w-lg mx-auto text-center space-y-3">
+                <div class="flex justify-center gap-6">
+                    <a href="https://www.facebook.com/kementrans.ri" target="_blank" class="text-white/60 hover:text-blue-400 text-xs flex items-center gap-1.5 transition"><i class="fa-brands fa-facebook"></i> Facebook</a>
+                    <a href="https://www.instagram.com/kementrans.ri/" target="_blank" class="text-white/60 hover:text-pink-400 text-xs flex items-center gap-1.5 transition"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                    <a href="https://x.com/Kementrans_RI" target="_blank" class="text-white/60 hover:text-slate-300 text-xs flex items-center gap-1.5 transition"><i class="fa-brands fa-x-twitter"></i> X / Twitter</a>
+                </div>
+                <p class="text-[11px] text-white/50"><i class="fa-solid fa-location-dot text-[#d4af5a] mr-1"></i> Jl. TMP Kalibata No.17, Jakarta Selatan, 12750</p>
+                <p class="text-[10px] text-white/30">&copy; 2026 Kementerian Transmigrasi Republik Indonesia. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== APLIKASI UTAMA (SETELAH LOGIN) ==================== -->
+    <div id="main-app" class="hidden flex-grow flex flex-col main-bg min-h-screen overflow-x-hidden">
+        
+        <!-- Navbar Kompak -->
+        <header class="bg-gradient-to-r from-[#0a2a3d] via-[#0d3b4f] to-[#0a4a5c] px-4 sm:px-8 py-3 flex items-center justify-between shadow-lg shadow-slate-900/20 sticky top-0 z-40 border-b border-white/5">
+            <!-- Logo & Nama Kementerian -->
+            <div class="flex items-center gap-3">
+                <div class="relative shrink-0">
+                    <div class="absolute inset-0 rounded-full bg-[#d4af5a]/25 blur-md scale-110"></div>
+                    <img src="logo.jpg" alt="Logo" class="relative w-10 h-10 rounded-full object-cover ring-2 ring-[#d4af5a]/50 shadow-lg" onerror="this.style.display='none'">
+                </div>
+                <div>
+                    <span class="text-white text-sm sm:text-[15px] font-extrabold leading-tight block tracking-tight">Kementerian <span class="text-[#d4af5a]">Transmigrasi</span></span>
+                    <span class="text-teal-200/55 text-[9px] font-bold subtitle-caps hidden sm:block">Republik Indonesia</span>
+                </div>
+            </div>
+
+            <!-- Sisi Kanan: Flag + Info User + Logout -->
+            <div class="flex items-center gap-2.5 sm:gap-3">
+
+                <!-- Bendera Indonesia -->
+                <div class="hidden sm:flex items-center gap-2 bg-white/8 px-3 py-1.5 rounded-full border border-white/10">
+                    <div class="w-5 h-3.5 rounded-[3px] overflow-hidden flex flex-col shrink-0 shadow-sm">
+                        <div class="bg-[#cc0000] h-1/2 w-full"></div>
+                        <div class="bg-white h-1/2 w-full"></div>
+                    </div>
+                    <span class="text-[10px] font-bold text-white/80 tracking-wide">Indonesia</span>
+                </div>
+
+                <!-- Info Pengguna -->
+                <div class="flex items-center gap-2 bg-white/10 pl-2.5 pr-3 py-1.5 rounded-full border border-white/10 min-w-0 max-w-[200px] sm:max-w-[260px]">
+                    <div class="w-6 h-6 rounded-full bg-teal-500/25 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-user text-teal-300 text-[10px]"></i>
+                    </div>
+                    <div class="flex flex-col min-w-0 leading-tight">
+                        <span class="text-[11px] font-bold text-white truncate" id="user-display-name">-</span>
+                        <span class="text-[9px] text-white/50 truncate hidden md:block" id="user-display-instansi">-</span>
+                    </div>
+                    <span id="admin-badge" class="hidden ml-1 text-[8px] font-extrabold bg-[#d4af5a]/20 text-[#d4af5a] px-1.5 py-0.5 rounded-full border border-[#d4af5a]/30 shrink-0 tracking-wide">SUPERADMIN</span>
+                </div>
+
+                <!-- Tombol Logout -->
+                <button onclick="handleLogout()" title="Keluar" class="flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/10 hover:bg-red-500/25 border border-white/10 hover:border-red-400/30 transition-all duration-200 text-white/70 hover:text-red-200 shrink-0 group">
+                    <i class="fa-solid fa-right-from-bracket text-xs group-hover:translate-x-0.5 transition-transform"></i>
+                    <span class="text-[11px] font-semibold hidden sm:inline">Keluar</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+            
+            <!-- Dashboard Title & Tab Bar Kompak -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2 border-b border-slate-200/80">
+                <div class="space-y-0.5">
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                        <span>Shorten Link Transmigrasi</span>
+                        <span class="text-[10px] font-bold px-2 py-0.5 bg-teal-100 text-teal-800 rounded-full">v2.0</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 font-medium">Portal Resmi Manajemen Tautan & Informasi Kementerian Transmigrasi</p>
+                </div>
+
+                <!-- Tab Khusus Super Admin & User -->
+                <div id="admin-tabs-section" class="hidden">
+                    <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-full border border-slate-200">
+                        <button class="admin-tab active" onclick="switchTab('links')" id="tab-links"><i class="fa-solid fa-link mr-1.5 text-[10px]"></i>Tautan</button>
+                        <button class="admin-tab" onclick="switchTab('users')" id="tab-users"><i class="fa-solid fa-users-gear mr-1.5 text-[10px]"></i>Pengguna</button>
+                        <button class="admin-tab" onclick="switchTab('stats')" id="tab-stats"><i class="fa-solid fa-chart-line mr-1.5 text-[10px]"></i>Statistik</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== PANEL 1: TAUTAN ==================== -->
+            <div id="panel-links" class="space-y-6">
+                
+                <!-- Form Buat Tautan Baru -->
+                <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/70 shadow-xs">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <span class="w-6 h-6 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center text-xs"><i class="fa-solid fa-plus"></i></span>
+                            <span>Buat Tautan Baru</span>
+                        </h3>
+                    </div>
+
+                    <form onsubmit="handleShorten(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+                            <!-- URL Panjang -->
+                            <div class="md:col-span-6 space-y-1">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">URL Asli (Tujuan Panjang) <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <input type="url" id="long-url" required placeholder="https://contoh.go.id/dokumen-surat-resmi" class="block w-full pl-3.5 pr-9 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white transition font-medium">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-link text-xs"></i></div>
+                                </div>
+                            </div>
+
+                            <!-- Alias Kustom -->
+                            <div class="md:col-span-3 space-y-1">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Alias Kustom <span class="text-slate-400 font-normal">(opsional)</span></label>
+                                <div class="relative">
+                                    <input type="text" id="custom-alias" placeholder="misal: panduan-trans" class="block w-full pl-3.5 pr-8 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white transition font-medium">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400"><i class="fa-regular fa-bookmark text-xs"></i></div>
+                                </div>
+                            </div>
+
+                            <!-- Masa Berlaku / Kedaluwarsa Preset -->
+                            <div class="md:col-span-3 space-y-1">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Masa Berlaku Tautan</label>
+                                <select id="link-expires-preset" onchange="onExpiryPresetChange('link-expires-preset', 'link-expires-custom-wrap')" class="block w-full px-3 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white text-slate-700">
+                                    <option value="never">Selamanya (Permanen)</option>
+                                    <option value="7d">7 Hari (1 Minggu)</option>
+                                    <option value="30d">30 Hari (1 Bulan)</option>
+                                    <option value="90d">90 Hari (3 Bulan)</option>
+                                    <option value="1y">1 Tahun (365 Hari)</option>
+                                    <option value="custom">Pilih Tanggal Kustom...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Input Tanggal Kustom (Jika memilih custom) -->
+                        <div id="link-expires-custom-wrap" class="hidden max-w-xs space-y-1 pt-1">
+                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Pilih Tanggal & Jam Batas</label>
+                            <input type="datetime-local" id="link-expires-custom" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:border-teal-600">
+                        </div>
+
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="text-[11px] text-slate-400 italic hidden sm:inline">Tautan otomatis terenkripsi dan diarahkan secara instan.</span>
+                            <button type="submit" id="btn-shorten" class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-[#004d40] to-[#00695c] hover:from-[#003d33] hover:to-[#005747] text-white font-bold rounded-xl transition shadow-sm flex items-center justify-center gap-2 text-xs">
+                                <i class="fa-solid fa-bolt text-xs text-[#d4af5a]"></i>
+                                <span>Perpendek URL</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Daftar Tautan -->
+                <div class="bg-white rounded-2xl border border-slate-200/70 shadow-xs overflow-hidden">
+                    <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3.5 bg-slate-50/50">
+                        <div class="flex items-center gap-2.5">
+                            <h3 class="text-sm font-bold text-slate-900">Daftar Tautan Terdaftar</h3>
+                            <span id="links-count-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700">0</span>
+                        </div>
+
+                        <!-- Filter & Ekspor Bar -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Filter Satker -->
+                            <select id="filter-links-satker" onchange="renderLinks()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-teal-600 text-slate-700">
+                                <option value="">Semua Satker/Instansi</option>
+                            </select>
+
+                            <!-- Filter Status -->
+                            <select id="filter-links-status" onchange="renderLinks()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-teal-600 text-slate-700">
+                                <option value="all">Semua Status</option>
+                                <option value="active">Aktif</option>
+                                <option value="expired">Kedaluwarsa</option>
+                                <option value="inactive">Nonaktif</option>
+                            </select>
+
+                            <!-- Search -->
+                            <div class="relative flex-grow sm:flex-grow-0 sm:w-56">
+                                <input type="text" id="search-links" oninput="renderLinks()" placeholder="Cari tautan, pembuat..." class="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-teal-600">
+                                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-magnifying-glass text-[10px]"></i></div>
+                            </div>
+
+                            <!-- Tombol Ekspor CSV -->
+                            <button onclick="exportLinksToCsv()" class="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5" title="Ekspor ke CSV/Excel">
+                                <i class="fa-solid fa-file-csv text-teal-700"></i>
+                                <span class="hidden sm:inline">Ekspor CSV</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Tautan -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[640px]">
+                            <thead>
+                                <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 border-b border-slate-100">
+                                    <th class="py-3 px-4 sm:px-6 font-bold">Tautan Pendek & Tujuan</th>
+                                    <th class="py-3 px-4 sm:px-6 font-bold">Pembuat / Satker</th>
+                                    <th class="py-3 px-4 sm:px-6 font-bold text-center">Status & Masa Berlaku</th>
+                                    <th class="py-3 px-4 sm:px-6 text-center font-bold">Klik</th>
+                                    <th class="py-3 px-4 sm:px-6 text-right font-bold">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="links-list-body" class="text-xs divide-y divide-slate-100">
+                                <tr><td colspan="5" class="py-10 text-center text-slate-400">Memuat data tautan...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== PANEL 2: PENGGUNA (SUPER ADMIN ONLY) ==================== -->
+            <div id="panel-users" class="hidden space-y-6">
+                
+                <div class="bg-white rounded-2xl border border-slate-200/70 shadow-xs overflow-hidden">
+                    <div class="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5 bg-slate-50/50">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">Manajemen Pengguna</h3>
+                            <p class="text-[11px] text-slate-500">Kelola akun, reset password, dan hak akses pegawai kementerian</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Search User -->
+                            <div class="relative w-full sm:w-56">
+                                <input type="text" id="search-users" oninput="renderUsers()" placeholder="Cari nama, username, instansi..." class="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-teal-600">
+                                <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400"><i class="fa-solid fa-magnifying-glass text-[10px]"></i></div>
+                            </div>
+
+                            <!-- Tombol Tambah Pengguna Modal -->
+                            <button onclick="openCreateUserModal()" class="px-4 py-2 bg-[#004d40] hover:bg-[#00332c] text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-user-plus text-[11px]"></i>
+                                <span>+ Pengguna Baru</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Pengguna -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[560px]">
+                            <thead>
+                                <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 border-b border-slate-100">
+                                    <th class="py-3 px-4 sm:px-6 font-bold">Username & Akun</th>
+                                    <th class="py-3 px-4 sm:px-6 font-bold">Nama Lengkap</th>
+                                    <th class="py-3 px-4 sm:px-6 font-bold">Satker / Instansi</th>
+                                    <th class="py-3 px-4 sm:px-6 text-center font-bold">Role</th>
+                                    <th class="py-3 px-4 sm:px-6 text-center font-bold">Status</th>
+                                    <th class="py-3 px-4 sm:px-6 text-right font-bold">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-list-body" class="text-xs divide-y divide-slate-100">
+                                <tr><td colspan="6" class="py-10 text-center text-slate-400">Memuat data pengguna...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== PANEL 3: STATISTIK (SUPER ADMIN ONLY) ==================== -->
+            <div id="panel-stats" class="hidden space-y-6">
+                
+                <!-- Baris Atas: 3 Kartu Ringkasan Eksekutif -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Kartu Pengguna -->
+                    <div class="relative bg-gradient-to-br from-[#0a2a3d] via-[#0d3b4f] to-[#0a4a5c] rounded-2xl p-5 text-white shadow-md overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[#d4af5a]">
+                                <i class="fa-solid fa-users text-sm"></i>
+                            </div>
+                            <div id="trend-users" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10"></div>
+                        </div>
+                        <p class="text-[10px] font-bold text-teal-200/70 uppercase tracking-widest">Total Pengguna</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span class="text-3xl font-black tracking-tight" id="stat-users">0</span>
+                            <span class="text-[11px] text-teal-100/60" id="stat-users-sub">0 aktif</span>
+                        </div>
+                        <div class="h-10 mt-3 -mx-1" id="spark-users"></div>
+                    </div>
+
+                    <!-- Kartu Tautan -->
+                    <div class="relative bg-gradient-to-br from-[#0d3b4f] via-[#0a4a5c] to-[#005b60] rounded-2xl p-5 text-white shadow-md overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-[#d4af5a]">
+                                <i class="fa-solid fa-link text-sm"></i>
+                            </div>
+                            <div id="trend-links" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10"></div>
+                        </div>
+                        <p class="text-[10px] font-bold text-teal-200/70 uppercase tracking-widest">Total Tautan</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span class="text-3xl font-black tracking-tight" id="stat-links">0</span>
+                            <span class="text-[11px] text-teal-100/60" id="stat-links-sub">0 aktif</span>
+                        </div>
+                        <div class="h-10 mt-3 -mx-1" id="spark-links"></div>
+                    </div>
+
+                    <!-- Kartu Klik -->
+                    <div class="relative bg-gradient-to-br from-[#004d40] via-[#00695c] to-[#00796b] rounded-2xl p-5 text-white shadow-md overflow-hidden">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="w-10 h-10 rounded-xl bg-[#d4af5a]/20 backdrop-blur-md flex items-center justify-center text-[#d4af5a]">
+                                <i class="fa-solid fa-chart-line text-sm"></i>
+                            </div>
+                            <div id="trend-clicks" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10"></div>
+                        </div>
+                        <p class="text-[10px] font-bold text-teal-200/70 uppercase tracking-widest">Total Pengalihan / Klik</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <span class="text-3xl font-black tracking-tight" id="stat-clicks">0</span>
+                            <span class="text-[11px] text-teal-100/60">pengunjung</span>
+                        </div>
+                        <div class="h-10 mt-3 -mx-1" id="spark-clicks"></div>
+                    </div>
+                </div>
+
+                <!-- Baris Bawah: 2 Widget Keren (Top 5 Tautan & Leaderboard Satker) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    
+                    <!-- Widget 1: Top 5 Tautan Terpopuler -->
+                    <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/70 shadow-xs p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="text-amber-500"><i class="fa-solid fa-trophy"></i></span>
+                                    <span>Top 5 Tautan Paling Banyak Diklik</span>
+                                </h3>
+                                <p class="text-[11px] text-slate-400">Tautan dengan interaksi tertinggi dari masyarakat & internal</p>
+                            </div>
+                            <button onclick="loadStats(true)" class="p-1.5 text-slate-400 hover:text-teal-700 transition" title="Refresh Data"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="text-[9px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">
+                                        <th class="py-2">Kode / Alias</th>
+                                        <th class="py-2">Satker</th>
+                                        <th class="py-2 text-right">Total Klik</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-links-body" class="divide-y divide-slate-100">
+                                    <tr><td colspan="3" class="py-6 text-center text-slate-400">Belum ada data klik.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Widget 2: Leaderboard Satker / Instansi Teraktif -->
+                    <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200/70 shadow-xs p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                    <span class="text-teal-600"><i class="fa-solid fa-building-columns"></i></span>
+                                    <span>Satker / Instansi Teraktif</span>
+                                </h3>
+                                <p class="text-[11px] text-slate-400">Unit kerja penerbit tautan terbanyak</p>
+                            </div>
+                        </div>
+
+                        <div id="satker-leaderboard-body" class="space-y-3">
+                            <p class="text-center text-slate-400 py-6 text-xs">Belum ada data satker.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Footer Aplikasi -->
+        <footer class="bg-gradient-to-r from-[#0a2a3d] via-[#0d3b4f] to-[#0a4a5c] mt-auto border-t border-white/10 text-white/70 py-6 px-4">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2">
+                    <img src="logo.jpg" alt="Logo" class="w-5 h-5 rounded object-cover" onerror="this.style.display='none'">
+                    <span class="font-bold text-white">Kementerian Transmigrasi Republik Indonesia</span>
+                </div>
+                <div class="text-[11px] text-white/50">
+                    &copy; 2026 Portal Shorten Link Resmi Internal
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- Modal 1: Konfirmasi Pengalihan Tautan Aman -->
+    <div id="redirect-modal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 text-center relative">
+            <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 mx-auto flex items-center justify-center text-lg mb-3">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-900 mb-1">Pengalihan Tautan Resmi</h3>
+            <p class="text-xs text-slate-500 mb-4">Pastikan alamat tujuan sesuai dengan kebutuhan Anda.</p>
+            <div class="bg-slate-50 p-4 rounded-2xl text-left border border-slate-100 mb-5 space-y-2.5">
+                <div>
+                    <span class="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">Tautan Pendek</span>
+                    <span id="redirect-short-display" class="text-xs font-bold text-teal-800 block break-all">-</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">Tujuan Asli</span>
+                    <span id="redirect-url-display" class="text-xs font-medium text-slate-700 block break-all">-</span>
+                </div>
+            </div>
+            <div class="flex space-x-2.5 text-xs">
+                <button onclick="closeRedirectModal()" class="flex-1 py-2.5 px-4 rounded-xl font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Batal</button>
+                <a id="redirect-confirm-btn" href="#" target="_blank" onclick="closeRedirectModal()" class="flex-1 py-2.5 px-4 rounded-xl font-bold bg-[#004d40] text-white hover:bg-[#00332c] text-center transition flex items-center justify-center gap-1">
+                    <span>Buka Tautan</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: QR Code Generator & Download Kartu Resmi -->
+    <div id="qr-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 text-center relative my-auto">
+            <button onclick="closeQrModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100"><i class="fa-solid fa-xmark text-sm"></i></button>
+            
+            <!-- Header Kartu Pratinjau -->
+            <div class="mb-4">
+                <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-teal-100 text-teal-800 mb-1">Kartu QR Code Resmi</span>
+                <h3 class="text-base font-bold text-slate-900" id="qr-modal-title">Tautan Pendek</h3>
+            </div>
+
+            <!-- Preview Frame Kartu Branding Kementerian -->
+            <div class="bg-gradient-to-br from-[#0a2a3d] via-[#0d3b4f] to-[#0a4a5c] p-4 sm:p-5 rounded-2xl text-white shadow-md border border-white/20 mb-4 text-center relative overflow-hidden">
+                <div class="flex items-center justify-center gap-2.5 mb-3 border-b border-white/10 pb-2.5">
+                    <img src="logo.jpg" alt="Logo" class="w-8 h-8 rounded-lg object-contain bg-white p-0.5" onerror="this.style.display='none'">
+                    <div class="text-left">
+                        <p class="text-[11px] font-extrabold uppercase leading-tight tracking-wider text-white">Kementerian Transmigrasi</p>
+                        <p class="text-[9px] font-bold text-[#d4af5a] uppercase">Republik Indonesia</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-3 rounded-xl inline-block shadow-lg mb-2.5">
+                    <div id="qrcode-target" class="flex justify-center"></div>
+                </div>
+
+                <p class="text-xs font-mono font-bold text-[#d4af5a] break-all mb-1" id="qr-modal-url">-</p>
+                <p class="text-[10px] text-white/80 font-medium" id="qr-modal-creator">-</p>
+                <div class="mt-2 pt-2 border-t border-white/10 flex items-center justify-center gap-1 text-[9px] text-teal-200/80">
+                    <i class="fa-solid fa-shield-check text-[#d4af5a]"></i>
+                    <span>Pindai untuk membuka portal resmi terverifikasi</span>
+                </div>
+            </div>
+
+            <!-- Tombol Aksi Unduh -->
+            <div class="flex flex-col gap-2">
+                <button onclick="downloadBrandedQrCard()" class="w-full py-2.5 px-4 rounded-xl font-bold bg-[#004d40] hover:bg-[#00332c] text-white text-xs transition flex items-center justify-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-image text-xs text-[#d4af5a]"></i> <span>Unduh Kartu Gambar QR Resmi (PNG)</span>
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="downloadQrCode()" class="py-2 px-3 rounded-xl font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-qrcode text-xs"></i> <span>QR Polos</span>
+                    </button>
+                    <button onclick="copyQrLink()" class="py-2 px-3 rounded-xl font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] transition flex items-center justify-center gap-1.5">
+                        <i class="fa-regular fa-copy text-xs"></i> <span>Salin URL</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Edit Tautan (URL Asli, Expiration Preset, Status Aktif) -->
+    <div id="edit-link-modal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 relative">
+            <button onclick="closeEditLinkModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <h3 class="text-base font-bold text-slate-900 mb-1">Edit Tautan</h3>
+            <p class="text-xs text-slate-500 mb-4">Perbarui URL tujuan asli, masa berlaku, atau status aktif tautan.</p>
+            
+            <form onsubmit="handleSaveEditLink(event)" class="space-y-3.5">
+                <input type="hidden" id="edit-link-code">
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Kode / Alias</label>
+                    <input type="text" id="edit-link-code-display" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-mono text-slate-600 font-bold">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">URL Asli (Tujuan Panjang) <span class="text-red-500">*</span></label>
+                    <input type="url" id="edit-link-long-url" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white transition font-medium">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Masa Berlaku Tautan</label>
+                    <select id="edit-link-expires-preset" onchange="onExpiryPresetChange('edit-link-expires-preset', 'edit-link-expires-custom-wrap')" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:border-teal-600 focus:bg-white">
+                        <option value="never">Selamanya (Permanen)</option>
+                        <option value="7d">7 Hari (1 Minggu)</option>
+                        <option value="30d">30 Hari (1 Bulan)</option>
+                        <option value="90d">90 Hari (3 Bulan)</option>
+                        <option value="1y">1 Tahun (365 Hari)</option>
+                        <option value="custom">Pilih Tanggal Kustom...</option>
+                    </select>
+                </div>
+
+                <div id="edit-link-expires-custom-wrap" class="hidden space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Pilih Tanggal & Jam Batas</label>
+                    <input type="datetime-local" id="edit-link-expires-custom" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:outline-none focus:border-teal-600">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Status Tautan</label>
+                    <select id="edit-link-is-active" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                        <option value="true">Aktif (Dapat Diakses)</option>
+                        <option value="false">Nonaktif (Dinonaktifkan Sementara)</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeEditLinkModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#004d40] hover:bg-[#00332c] transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk text-xs"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 4: Buat Pengguna Baru (Super Admin Only) -->
+    <div id="create-user-modal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 relative">
+            <button onclick="closeCreateUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <h3 class="text-base font-bold text-slate-900 mb-1">Tambah Pengguna Baru</h3>
+            <p class="text-xs text-slate-500 mb-4">Buat akun untuk pegawai / satker kementerian.</p>
+            
+            <form onsubmit="handleCreateUser(event)" class="space-y-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Username <span class="text-red-500">*</span></label>
+                    <input type="text" id="cu-username" required placeholder="misal: humas.kementrans" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Password Awal <span class="text-red-500">*</span></label>
+                    <input type="password" id="cu-password" required placeholder="minimal 6 karakter" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input type="text" id="cu-name" required placeholder="Nama Lengkap Pegawai / Admin" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Satker / Instansi <span class="text-red-500">*</span></label>
+                    <input type="text" id="cu-instansi" required placeholder="misal: Biro Humas / Pusdatin" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Role</label>
+                        <select id="cu-role" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                            <option value="user">User (Pegawai)</option>
+                            <option value="superadmin">Super Admin</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Status</label>
+                        <select id="cu-status" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeCreateUserModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#004d40] hover:bg-[#00332c] transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-check text-xs"></i> Buat Akun
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 5: Edit Pengguna (Super Admin Only) -->
+    <div id="edit-user-modal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 relative">
+            <button onclick="closeEditUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <h3 class="text-base font-bold text-slate-900 mb-1">Edit Data Pengguna</h3>
+            <p class="text-xs text-slate-500 mb-4">Perbarui informasi profil dan hak akses pengguna.</p>
+            
+            <form onsubmit="handleSaveEditUser(event)" class="space-y-3">
+                <input type="hidden" id="eu-username">
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Username</label>
+                    <input type="text" id="eu-username-display" disabled class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Nama Lengkap <span class="text-red-500">*</span></label>
+                    <input type="text" id="eu-name" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Satker / Instansi <span class="text-red-500">*</span></label>
+                    <input type="text" id="eu-instansi" required class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Role</label>
+                        <select id="eu-role" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                            <option value="user">User (Pegawai)</option>
+                            <option value="superadmin">Super Admin</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Status Akun</label>
+                        <select id="eu-status" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#004d40] hover:bg-[#00332c] transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-floppy-disk text-xs"></i> Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 6: Reset Password Pengguna (Super Admin Only) -->
+    <div id="reset-password-modal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 relative">
+            <button onclick="closeResetPasswordModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <h3 class="text-base font-bold text-slate-900 mb-1">Reset Password Pengguna</h3>
+            <p class="text-xs text-slate-500 mb-4">Tentukan kata sandi baru untuk akun <span id="rp-username-display" class="font-bold text-slate-800">-</span>.</p>
+            
+            <form onsubmit="handleSaveResetPassword(event)" class="space-y-3.5">
+                <input type="hidden" id="rp-username">
+
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Password Baru <span class="text-red-500">*</span></label>
+                        <button type="button" onclick="generateRandomPassword()" class="text-[10px] text-teal-700 font-bold hover:underline flex items-center gap-1"><i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Buat Password Acak</button>
+                    </div>
+                    <div class="relative">
+                        <input type="text" id="rp-new-password" required minlength="6" placeholder="minimal 6 karakter" class="w-full px-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 focus:bg-white">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeResetPasswordModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-key text-xs"></i> Reset Password
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== TOAST NOTIFIKASI ==================== -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-semibold border border-slate-700">
+            <span id="toast-icon" class="text-teal-400"><i class="fa-solid fa-circle-check"></i></span>
+            <span id="toast-message">Berhasil!</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

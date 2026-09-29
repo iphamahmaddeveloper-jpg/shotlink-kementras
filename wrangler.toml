@@ -1,12 +1,11 @@
 # Nama project Cloudflare Pages. Ganti kalau deploy ke akun/project baru.
-name = "kementrian-transmigrasi"
-pages_build_output_dir = "public"
+name = "shotlink-kementras"
+compatibility_date = "2026-09-26"
 
 # Ganti id dengan KV namespace di akun Cloudflare yang dipakai.
 # Bikin lewat dashboard (Workers & Pages > KV) atau: npx wrangler kv namespace create LINKS
-[[kv_namespaces]]
-binding = "LINKS"
-id = "fbcf3988d0f54e09ae75b8e031a2e30b"
+[assets]
+directory = "./public"
 
 # Variable ADMIN_USERNAMES dan ALLOW_REGISTRATION diisi lewat dashboard:
 # Pages > Settings > Variables and Secrets. Lihat README.

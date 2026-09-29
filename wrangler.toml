@@ -1,23 +1,21 @@
-# Nama project Cloudflare Worker.
+# Cloudflare Worker - Shorten Link Transmigrasi
 name = "shotlink-kementras"
+main = "_worker.js"
 compatibility_date = "2026-09-26"
 
 [assets]
 directory = "./public"
+binding = "ASSETS"
 
-# ============================================================
-# WAJIB: Ganti "NAMESPACE_ID_KAMU" dengan ID KV namespace yang
-# sudah dibuat. Cara buat:
-#   npx wrangler kv namespace create LINKS --remote
-# Lalu copy ID-nya ke bawah ini.
-# ============================================================
+# KV Namespace binding untuk menyimpan data (user, link, session)
 [[kv_namespaces]]
 binding = "LINKS"
 id = "3fe80920bc094c1dbb31424170300420"
 
-# Variable env (opsional). Bisa juga diatur lewat Cloudflare Dashboard:
+# Variable env - bisa juga diatur lewat Cloudflare Dashboard:
 # Workers & Pages > shotlink-kementras > Settings > Variables and Secrets
 #
 # [vars]
 # ADMIN_USERNAMES = "admin"
 # ALLOW_REGISTRATION = "false"
+

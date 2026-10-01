@@ -1,13 +1,13 @@
-# Shorten Link Transmigrasi v2.0
+# Shorten Link Transmigrasi v2.1
 
-Aplikasi pemendek tautan resmi internal Kementerian Transmigrasi Republik Indonesia. Berjalan di Cloudflare Pages, datanya disimpan di Workers KV, dilengkapi sistem keamanan tinggi, manajemen kedaluwarsa tautan, generator QR Code, dan panel manajemen khusus Super Admin.
+Aplikasi pemendek tautan resmi internal Kementerian Transmigrasi Republik Indonesia. Berjalan di Cloudflare Pages, datanya disimpan di Workers KV, dilengkapi sistem keamanan tinggi, manajemen kedaluwarsa tautan, proteksi PIN, UTM campaign builder, generator QR Code berlogo, dan panel manajemen Super Admin.
 
 ## Isi Project
 
 ```
 public/
   index.html      tampilan dashboard terintegrasi (login, tautan, pengguna, statistik)
-  app.js          logika frontend: filter satker, CRUD pengguna, QR code, ekspor CSV, grafik
+  app.js          logika frontend: filter satker, CRUD pengguna, QR code berlogo, UTM builder, ekspor CSV, grafik
   logo.jpg        logo resmi Kementerian Transmigrasi
   _worker.js      seluruh backend serverless & REST API
   _routes.json    routing Pages
@@ -16,41 +16,32 @@ scripts/
 wrangler.toml     konfigurasi Pages + binding KV (LINKS)
 ```
 
-## Fitur Utama & Pembaruan (v2.0)
+## Fitur Utama & Pembaruan (v2.1)
 
-1. **Keamanan Login Tinggi**:
-   - Algoritma hashing ditingkatkan ke **PBKDF2-HMAC-SHA256 (100.000 iterasi)** dengan salt acak (kompatibel transparan dengan akun lama).
-   - **Rate Limiting Anti-Brute Force**: Pembatasan percobaan login gagal (kunci sementara setelah 5x gagal dalam 15 menit).
-   - **Reserved Aliases Protection**: Mencegah benturan rute seperti `/api`, `/admin`, `/login`, dll.
-   - **Security Headers HTTP**: `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy`.
+1. **Ganti Kata Sandi Mandiri**:
+   - Pegawai/User dapat mengubah kata sandinya sendiri langsung dari menu navbar dashboard (`/api/change-password`) tanpa harus menghubungi Super Admin.
 
-2. **Masa Berlaku Tautan (Link Expiry) & Status**:
-   - Pengaturan batas waktu aktif tautan (`expiresAt`) opsional.
-   - Halaman pengalihan resmi khusus untuk tautan kedaluwarsa (*410 Link Expired*) dan dinonaktifkan (*403 Inactive*).
+2. **Proteksi PIN Akses pada Tautan (Opsional)**:
+   - Tautan sensitif / internal dapat diproteksi dengan PIN 4-6 digit.
+   - Pengunjung publik akan diarahkan ke halaman input PIN resmi Kementerian Transmigrasi sebelum dialihkan ke dokumen/tujuan asli.
 
-3. **Generator QR Code Resmi**:
-   - Generator QR Code otomatis untuk setiap tautan pendek.
-   - Opsi unduh gambar QR Code resolusi tinggi (.PNG) untuk kebutuhan surat dinas, banner, dan spanduk.
+3. **UTM Campaign Builder (Humas / Publikasi)**:
+   - Form pembuatan & edit link dilengkapi generator parameter UTM (`utm_source`, `utm_medium`, `utm_campaign`) otomatis untuk pelacakan kampanye humas dan media sosial.
 
-4. **Header Dashboard Kompak**:
-   - Tata letak dashboard diperbarui agar hemat ruang vertikal (*compact viewport*), sehingga data tabel langsung terlihat jelas.
+4. **Branded QR Code dengan Logo Resmi di Tengah**:
+   - Generator QR Code otomatis menyematkan logo resmi Kementerian Transmigrasi di tengah matriks QR dengan koreksi eror Level H.
+   - Opsi unduh: **Kartu Gambar QR Resmi (PNG)**, **QR Code Berlogo (PNG)**, dan **QR Polos (PNG)**.
 
-5. **Manajemen Pengguna Lengkap (Khusus Super Admin)**:
-   - Pembuatan akun pengguna/pegawai hanya dapat dilakukan oleh Super Admin.
-   - Fitur Edit Data Pengguna (Nama, Instansi, Role).
-   - Fitur Reset Password Pengguna dengan generator sandi acak.
-   - Fitur Nonaktifkan/Aktifkan Akun (Suspend/Active).
-   - Filter dan pencarian pengguna berbasis nama/satker.
+5. **Paginasi & Optimasi Tabel Tautan**:
+   - Tabel tautan dilengkapi navigasi halaman dinamis (10, 25, 50 data per halaman) dan pencarian instan.
 
-6. **Penyempurnaan Manajemen Tautan**:
-   - Edit URL tujuan dan tanggal kedaluwarsa tanpa mengubah kode pendek.
-   - Filter tautan berdasarkan Satker/Instansi dan Status (Aktif/Kedaluwarsa/Nonaktif).
-   - Ekspor data tautan ke file **CSV / Excel** sekali klik.
+6. **Pencatatan Klik Harian Akurat (WIB)**:
+   - Backend mencatat counter klik aktual harian (`dayclicks:YYYY-MM-DD`) secara terpisah, sehingga grafik tren klik 7 hari mencerminkan lonjakan trafik harian yang sebenarnya.
 
-7. **Dashboard Statistik Eksekutif**:
-   - Widget **Top 5 Tautan Paling Banyak Diklik**.
-   - Leaderboard **Satker / Instansi Teraktif**.
-   - Grafik kurva tren 7 hari (Pengguna, Tautan, Klik).
+7. **Keamanan Login & Tata Kelola Lengkap**:
+   - Hashing **PBKDF2-HMAC-SHA256 (100.000 iterasi)** dengan salt acak.
+   - Rate limiting brute force (kunci sementara setelah percobaan gagal).
+   - Ekspor seluruh tautan ke file **CSV / Excel** sekali klik.
 
 ## Endpoint API
 
@@ -58,9 +49,10 @@ wrangler.toml     konfigurasi Pages + binding KV (LINKS)
 |---|---|---|---|
 | POST | `/api/login`, `/api/logout` | Publik | Login dengan rate-limit dan cookie HttpOnly |
 | GET | `/api/me` | Publik | Cek sesi login aktif |
+| POST | `/api/change-password` | User / Admin | Ganti kata sandi akun sendiri |
 | GET | `/api/links` | User / Admin | Mengambil daftar tautan |
-| POST | `/api/links` | User / Admin | Membuat tautan baru |
-| POST | `/api/links/update` | Pembuat / Admin | Mengedit URL asli, batas waktu, & status |
+| POST | `/api/links` | User / Admin | Membuat tautan baru (mendukung PIN & Expiry) |
+| POST | `/api/links/update` | Pembuat / Admin | Mengedit URL asli, batas waktu, PIN, & status |
 | DELETE | `/api/links` | Pembuat / Admin | Menghapus tautan |
 | GET | `/api/admin/users` | Super Admin | Mengambil daftar pengguna |
 | POST | `/api/admin/create-user` | Super Admin | Membuat akun pengguna baru |
@@ -68,7 +60,7 @@ wrangler.toml     konfigurasi Pages + binding KV (LINKS)
 | POST | `/api/admin/reset-password` | Super Admin | Mereset kata sandi pengguna |
 | POST | `/api/admin/delete-user` | Super Admin | Menghapus akun pengguna |
 | GET | `/api/admin/stats` | Super Admin | Metrik statistik, Top 5 & Leaderboard |
-| GET | `/<kode>` | Publik | Pengalihan 302 instan ke URL tujuan |
+| GET/POST | `/<kode>` | Publik | Pengalihan 302 instan atau verifikasi PIN |
 
 ## Menjalankan dan Deploy
 

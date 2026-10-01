@@ -200,7 +200,54 @@ function switchTab(tab) {
 }
 
 
-// ---------- Modul 1: Manajemen Tautan (Shortlinks) ----------
+// // ---------- Modul 1: Manajemen Tautan (Shortlinks) & Kampanye ----------
+
+let linksCurrentPage = 1;
+let linksPageSize = 10;
+
+function changePageSize(size) {
+    linksPageSize = parseInt(size, 10) || 10;
+    renderLinks(1);
+}
+
+// UTM Campaign Builder Helpers
+function toggleUtmBuilder(ctx = 'create') {
+    const wrap = $(`utm-wrap-${ctx}`);
+    const chevron = $(`utm-chevron-${ctx}`);
+    if (!wrap) return;
+    const isHidden = wrap.classList.contains('hidden');
+    wrap.classList.toggle('hidden', !isHidden);
+    if (chevron) {
+        chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+}
+
+function applyUtmToUrl(ctx = 'create') {
+    const urlInput = ctx === 'create' ? $('long-url') : $('edit-link-long-url');
+    const source = ($('utm-source')?.value || '').trim();
+    const medium = ($('utm-medium')?.value || '').trim();
+    const campaign = ($('utm-campaign')?.value || '').trim();
+    if (!urlInput) return;
+
+    let currentVal = urlInput.value.trim();
+    if (!currentVal) return;
+
+    try {
+        const parsed = new URL(currentVal);
+        if (source) parsed.searchParams.set('utm_source', source);
+        else parsed.searchParams.delete('utm_source');
+
+        if (medium) parsed.searchParams.set('utm_medium', medium);
+        else parsed.searchParams.delete('utm_medium');
+
+        if (campaign) parsed.searchParams.set('utm_campaign', campaign);
+        else parsed.searchParams.delete('utm_campaign');
+
+        urlInput.value = parsed.toString();
+    } catch {
+        // Biarkan jika user belum selesai mengetik URL
+    }
+}
 
 async function loadLinks() {
     try {
@@ -209,7 +256,7 @@ async function loadLinks() {
         if (!ok || !Array.isArray(data)) throw new Error('Format data tidak valid');
         allLinks = data;
         populateSatkerFilter();
-        renderLinks();
+        renderLinks(1);
     } catch {
         $('links-list-body').innerHTML =
             '<tr><td colspan="5" class="py-8 text-center text-red-400">Gagal memuat daftar tautan.</td></tr>';
@@ -263,6 +310,7 @@ async function handleShorten(e) {
     const presetVal = $('link-expires-preset').value;
     const customVal = $('link-expires-custom').value;
     const expiresAt = calculateExpiryTimestamp(presetVal, customVal);
+    const pin = $('link-pin')?.value.trim() || null;
 
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Menyimpan...</span>';
@@ -270,7 +318,7 @@ async function handleShorten(e) {
     try {
         const { ok, data } = await api('/api/links', { 
             method: 'POST', 
-            body: { longUrl, alias, expiresAt } 
+            body: { longUrl, alias, expiresAt, pin } 
         });
         if (!ok) return showToast(data?.error || 'Gagal membuat tautan', true);
 
@@ -278,11 +326,15 @@ async function handleShorten(e) {
         $('custom-alias').value = '';
         $('link-expires-preset').value = 'never';
         $('link-expires-custom').value = '';
+        if ($('link-pin')) $('link-pin').value = '';
+        if ($('utm-source')) $('utm-source').value = '';
+        if ($('utm-medium')) $('utm-medium').value = '';
+        if ($('utm-campaign')) $('utm-campaign').value = '';
         $('link-expires-custom-wrap').classList.add('hidden');
 
         allLinks.unshift(data);
         populateSatkerFilter();
-        renderLinks();
+        renderLinks(1);
         showToast('Tautan resmi berhasil dibuat!');
     } catch {
         showToast('Terjadi kesalahan jaringan', true);
@@ -313,6 +365,10 @@ function linkRowHtml(link) {
         statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Kedaluwarsa</span>';
     }
 
+    const hasPinBadge = (link.hasPin || link.pin)
+        ? '<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-amber-50 text-amber-700 border border-amber-200 ml-1.5" title="Akses dilindungi PIN"><i class="fa-solid fa-lock text-[8px]"></i> PIN</span>'
+        : '';
+
     const expiryInfo = link.expiresAt 
         ? `<div class="text-[10px] text-slate-400 mt-0.5"><i class="fa-regular fa-clock text-[9px] mr-1"></i>s/d ${formatDate(link.expiresAt)}</div>`
         : '<div class="text-[10px] text-slate-400 mt-0.5">Selamanya</div>';
@@ -327,8 +383,9 @@ function linkRowHtml(link) {
 
     return `<tr class="hover:bg-slate-50/80 transition duration-150">
         <td class="py-3.5 px-4 sm:px-6 min-w-[200px]">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
                 <button data-action="open" data-code="${code}" class="text-left text-teal-700 hover:text-teal-900 hover:underline font-extrabold text-xs tracking-tight">${esc(shortUrlOf(link.code))}</button>
+                ${hasPinBadge}
             </div>
             <div class="text-slate-400 text-[11px] truncate max-w-xs sm:max-w-sm mt-0.5 font-normal" title="${longUrl}">
                 <i class="fa-solid fa-arrow-turn-down-right text-[9px] mr-1 text-slate-300"></i>${longUrl}
@@ -356,7 +413,8 @@ function linkRowHtml(link) {
     </tr>`;
 }
 
-function renderLinks() {
+function renderLinks(page = linksCurrentPage) {
+    linksCurrentPage = page;
     const tbody = $('links-list-body');
     const query = ($('search-links').value || '').toLowerCase().trim();
     const satkerFilter = ($('filter-links-satker')?.value || '').toLowerCase();
@@ -382,11 +440,45 @@ function renderLinks() {
         return matchQuery && matchSatker && matchStatus;
     });
 
-    $('links-count-badge').textContent = filtered.length;
+    const totalItems = filtered.length;
+    $('links-count-badge').textContent = totalItems;
 
-    tbody.innerHTML = filtered.length
-        ? filtered.map(linkRowHtml).join('')
+    const totalPages = Math.max(1, Math.ceil(totalItems / linksPageSize));
+    if (linksCurrentPage > totalPages) linksCurrentPage = totalPages;
+    if (linksCurrentPage < 1) linksCurrentPage = 1;
+
+    const startIdx = (linksCurrentPage - 1) * linksPageSize;
+    const endIdx = Math.min(startIdx + linksPageSize, totalItems);
+    const paginated = filtered.slice(startIdx, endIdx);
+
+    tbody.innerHTML = paginated.length
+        ? paginated.map(linkRowHtml).join('')
         : '<tr><td colspan="5" class="py-10 text-center text-slate-400">Tidak ada tautan yang sesuai filter.</td></tr>';
+
+    // Update Pagination Bar
+    const pageInfo = $('links-page-info');
+    if (pageInfo) {
+        pageInfo.textContent = totalItems > 0 
+            ? `Menampilkan ${startIdx + 1}-${endIdx} dari ${totalItems} data`
+            : 'Menampilkan 0 data';
+    }
+
+    const controls = $('links-pagination-controls');
+    if (controls) {
+        let btns = '';
+        btns += `<button onclick="renderLinks(${linksCurrentPage - 1})" ${linksCurrentPage <= 1 ? 'disabled class="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-100 text-slate-400 text-xs cursor-not-allowed"' : 'class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition"'}>&laquo; Prev</button>`;
+        
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === 1 || i === totalPages || (i >= linksCurrentPage - 1 && i <= linksCurrentPage + 1)) {
+                btns += `<button onclick="renderLinks(${i})" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${i === linksCurrentPage ? 'bg-[#004d40] text-white shadow-xs' : 'border border-slate-200 bg-white hover:bg-slate-100 text-slate-700'}">${i}</button>`;
+            } else if (i === linksCurrentPage - 2 || i === linksCurrentPage + 2) {
+                btns += `<span class="px-1 text-slate-400 text-xs">...</span>`;
+            }
+        }
+
+        btns += `<button onclick="renderLinks(${linksCurrentPage + 1})" ${linksCurrentPage >= totalPages ? 'disabled class="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-100 text-slate-400 text-xs cursor-not-allowed"' : 'class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition"'}>Next &raquo;</button>`;
+        controls.innerHTML = btns;
+    }
 }
 
 function onLinkTableClick(e) {
@@ -410,6 +502,7 @@ function openEditLinkModal(code) {
     $('edit-link-code-display').value = shortUrlOf(link.code);
     $('edit-link-long-url').value = link.longUrl;
     $('edit-link-is-active').value = link.isActive === false ? 'false' : 'true';
+    if ($('edit-link-pin')) $('edit-link-pin').value = link.pin || '';
 
     if (link.expiresAt) {
         $('edit-link-expires-preset').value = 'custom';
@@ -437,11 +530,12 @@ async function handleSaveEditLink(e) {
     const presetVal = $('edit-link-expires-preset').value;
     const customVal = $('edit-link-expires-custom').value;
     const expiresAt = calculateExpiryTimestamp(presetVal, customVal);
+    const pin = $('edit-link-pin')?.value.trim() || null;
 
     try {
         const { ok, data } = await api('/api/links/update', {
             method: 'POST',
-            body: { code, longUrl, isActive, expiresAt }
+            body: { code, longUrl, isActive, expiresAt, pin }
         });
 
         if (!ok) return showToast(data?.error || 'Gagal memperbarui tautan', true);
@@ -453,6 +547,8 @@ async function handleSaveEditLink(e) {
                 ...allLinks[idx], 
                 longUrl, 
                 isActive, 
+                pin,
+                hasPin: !!pin,
                 expiresAt: expiresAt ? new Date(expiresAt).getTime() : null 
             };
         }
@@ -465,8 +561,41 @@ async function handleSaveEditLink(e) {
     }
 }
 
-// Modal QR Code
+// Modal QR Code dengan Center Logo KemenTrans
 let currentLinkObj = null;
+
+function drawLogoOnQrCanvas(canvas, logoImg, callback) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const size = canvas.width;
+    const logoSize = Math.round(size * 0.24); // 24% ukuran QR
+    const logoX = Math.round((size - logoSize) / 2);
+    const logoY = Math.round((size - logoSize) / 2);
+
+    // Gambar rounded white box di belakang logo
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 2;
+    ctx.beginPath();
+    if (ctx.roundRect) {
+        ctx.roundRect(logoX - 4, logoY - 4, logoSize + 8, logoSize + 8, 10);
+    } else {
+        ctx.rect(logoX - 4, logoY - 4, logoSize + 8, logoSize + 8);
+    }
+    ctx.fill();
+    ctx.restore();
+
+    // Gambar Logo Resmi
+    try {
+        if (logoImg.complete && logoImg.naturalHeight !== 0) {
+            ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+        }
+    } catch { /* ignore */ }
+
+    if (callback) callback();
+}
 
 function openQrModal(code) {
     const link = allLinks.find((l) => l.code === code);
@@ -487,12 +616,26 @@ function openQrModal(code) {
     if (window.QRCode) {
         currentQrCodeInstance = new QRCode(container, {
             text: fullUrl,
-            width: 190,
-            height: 190,
+            width: 200,
+            height: 200,
             colorDark: "#0a2a3d",
             colorLight: "#ffffff",
             correctLevel: QRCode.CorrectLevel.H
         });
+
+        setTimeout(() => {
+            const qrCanvas = container.querySelector('canvas');
+            if (qrCanvas) {
+                const logoImg = new Image();
+                logoImg.crossOrigin = 'anonymous';
+                logoImg.src = 'logo.jpg';
+                if (logoImg.complete) {
+                    drawLogoOnQrCanvas(qrCanvas, logoImg);
+                } else {
+                    logoImg.onload = () => drawLogoOnQrCanvas(qrCanvas, logoImg);
+                }
+            }
+        }, 120);
     }
 
     $('qr-modal').classList.remove('hidden');
@@ -539,11 +682,12 @@ function downloadBrandedQrCard() {
             if (logoImg.complete && logoImg.naturalHeight !== 0) {
                 ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
-                ctx.roundRect(40, 45, 110, 110, 20);
+                if (ctx.roundRect) ctx.roundRect(40, 45, 110, 110, 20);
+                else ctx.rect(40, 45, 110, 110);
                 ctx.fill();
                 ctx.drawImage(logoImg, 50, 55, 90, 90);
             }
-        } catch (e) { /* ignore */ }
+        } catch { /* ignore */ }
 
         // Ministry Title
         ctx.fillStyle = '#ffffff';
@@ -564,7 +708,8 @@ function downloadBrandedQrCard() {
         ctx.shadowBlur = 24;
         ctx.shadowOffsetY = 10;
         ctx.beginPath();
-        ctx.roundRect(140, 260, 520, 520, 32);
+        if (ctx.roundRect) ctx.roundRect(140, 260, 520, 520, 32);
+        else ctx.rect(140, 260, 520, 520);
         ctx.fill();
         ctx.shadowColor = 'transparent';
 
@@ -576,7 +721,8 @@ function downloadBrandedQrCard() {
         ctx.strokeStyle = '#0d9488';
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(100, 815, 600, 70, 20);
+        if (ctx.roundRect) ctx.roundRect(100, 815, 600, 70, 20);
+        else ctx.rect(100, 815, 600, 70);
         ctx.fill();
         ctx.stroke();
 
@@ -616,6 +762,51 @@ function downloadBrandedQrCard() {
     }
 }
 
+// Unduh QR Code Berlogo (Standar Resolusi Tinggi PNG)
+function downloadLogoQrCode() {
+    if (!currentQrUrl) return;
+    const offscreen = document.createElement('div');
+    offscreen.style.display = 'none';
+    document.body.appendChild(offscreen);
+
+    new QRCode(offscreen, {
+        text: currentQrUrl,
+        width: 600,
+        height: 600,
+        colorDark: "#0a2a3d",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+
+    setTimeout(() => {
+        const qrCanvas = offscreen.querySelector('canvas');
+        if (!qrCanvas) {
+            document.body.removeChild(offscreen);
+            return showToast('Gagal memproses QR Code berlogo', true);
+        }
+
+        const logoImg = new Image();
+        logoImg.crossOrigin = 'anonymous';
+        logoImg.src = 'logo.jpg';
+        const doDownload = () => {
+            drawLogoOnQrCanvas(qrCanvas, logoImg, () => {
+                const a = document.createElement('a');
+                a.href = qrCanvas.toDataURL('image/png');
+                a.download = `QR-Berlogo-KemenTrans-${currentQrCodeName}.png`;
+                a.click();
+                document.body.removeChild(offscreen);
+                showToast('QR Code berlogo berhasil diunduh!');
+            });
+        };
+
+        if (logoImg.complete) doDownload();
+        else {
+            logoImg.onload = doDownload;
+            logoImg.onerror = doDownload;
+        }
+    }, 150);
+}
+
 function downloadQrCode() {
     const canvas = $('qrcode-target').querySelector('canvas');
     if (!canvas) {
@@ -644,18 +835,20 @@ function copyQrLink() {
 function exportLinksToCsv() {
     if (!allLinks.length) return showToast('Tidak ada data untuk diekspor', true);
 
-    const headers = ['Kode Shortlink', 'Tautan Asli', 'Pembuat', 'Satker/Instansi', 'Status', 'Batas Kedaluwarsa', 'Jumlah Klik', 'Tanggal Dibuat'];
+    const headers = ['Kode Shortlink', 'Tautan Asli', 'Pembuat', 'Satker/Instansi', 'Status', 'Proteksi PIN', 'Batas Kedaluwarsa', 'Jumlah Klik', 'Tanggal Dibuat'];
     const now = Date.now();
 
     const rows = allLinks.map((l) => {
         const isExpired = l.expiresAt && now > l.expiresAt;
         const status = l.isActive === false ? 'Nonaktif' : (isExpired ? 'Kedaluwarsa' : 'Aktif');
+        const pinStatus = (l.hasPin || l.pin) ? 'Ya (PIN)' : 'Tidak';
         return [
             shortUrlOf(l.code),
             `"${(l.longUrl || '').replace(/"/g, '""')}"`,
             `"${(l.creatorName || '').replace(/"/g, '""')}"`,
             `"${(l.creatorInstansi || '').replace(/"/g, '""')}"`,
             status,
+            pinStatus,
             l.expiresAt ? formatDate(l.expiresAt) : 'Selamanya',
             l.clicks || 0,
             formatDate(l.createdAt)
@@ -700,6 +893,68 @@ async function deleteLink(code) {
         showToast('Tautan berhasil dihapus.');
     } catch {
         showToast('Gagal menghapus tautan', true);
+    }
+}
+
+// ---------- Modul Profil & Ganti Password Mandiri ----------
+
+function openChangePasswordModal() {
+    $('cp-old-password').value = '';
+    $('cp-new-password').value = '';
+    $('cp-confirm-password').value = '';
+    $('cp-error').classList.add('hidden');
+    $('change-password-modal').classList.remove('hidden');
+}
+
+function closeChangePasswordModal() {
+    $('change-password-modal').classList.add('hidden');
+}
+
+async function handleSaveChangePassword(e) {
+    e.preventDefault();
+    const oldPassword = $('cp-old-password').value;
+    const newPassword = $('cp-new-password').value;
+    const confirmPassword = $('cp-confirm-password').value;
+    const errorEl = $('cp-error');
+    const submitBtn = $('cp-submit-btn');
+
+    errorEl.classList.add('hidden');
+
+    if (newPassword !== confirmPassword) {
+        errorEl.textContent = 'Konfirmasi password baru tidak cocok. Silakan periksa kembali.';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        errorEl.textContent = 'Password baru minimal harus 6 karakter.';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> <span>Menyimpan...</span>';
+
+    try {
+        const { ok, data } = await api('/api/change-password', {
+            method: 'POST',
+            body: { oldPassword, newPassword }
+        });
+
+        if (!ok) {
+            errorEl.textContent = data?.error || 'Gagal mengganti password.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        closeChangePasswordModal();
+        showToast('Password Anda berhasil diperbarui!');
+    } catch {
+        errorEl.textContent = 'Terjadi gangguan koneksi ke server.';
+        errorEl.classList.remove('hidden');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-lock text-xs"></i> <span>Simpan Password Baru</span>';
     }
 }
 

@@ -1,11 +1,7 @@
-# Cloudflare Worker - Shorten Link Transmigrasi
+# Cloudflare Pages - Shorten Link Transmigrasi
 name = "shotlink-kementras"
-main = "_worker.js"
 compatibility_date = "2026-09-26"
-
-[assets]
-directory = "./public"
-binding = "ASSETS"
+pages_build_output_dir = "public"
 
 # KV Namespace binding untuk menyimpan data (user, link, session)
 [[kv_namespaces]]

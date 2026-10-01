@@ -47,6 +47,64 @@ function showToast(message, isError = false) {
     }, 2400);
 }
 
+function showConfirmModal({
+    title = 'Konfirmasi Tindakan',
+    message = 'Apakah Anda yakin ingin melanjutkan tindakan ini?',
+    icon = 'fa-solid fa-triangle-exclamation',
+    okText = 'Ya, Lanjutkan',
+    cancelText = 'Batal',
+    isDanger = true
+} = {}) {
+    return new Promise((resolve) => {
+        const modal = $('confirm-modal');
+        const box = $('confirm-modal-box');
+        const iconWrap = $('confirm-icon-wrap');
+        const iconEl = $('confirm-icon');
+        const titleEl = $('confirm-title');
+        const msgEl = $('confirm-message');
+        const okBtn = $('confirm-ok-btn');
+        const cancelBtn = $('confirm-cancel-btn');
+
+        if (!modal || !box) {
+            return resolve(window.confirm(message));
+        }
+
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+        iconEl.className = icon;
+        okBtn.textContent = okText;
+        cancelBtn.textContent = cancelText;
+
+        if (isDanger) {
+            iconWrap.className = 'w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center mx-auto mb-4 text-xl border border-slate-800 shadow-sm';
+            okBtn.className = 'w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-black border border-slate-800 transition shadow-sm active:scale-95';
+        } else {
+            iconWrap.className = 'w-14 h-14 rounded-2xl bg-slate-100 text-slate-800 flex items-center justify-center mx-auto mb-4 text-xl border border-slate-200 shadow-xs';
+            okBtn.className = 'w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-[#004d40] hover:bg-[#00332c] border border-teal-950 transition shadow-sm active:scale-95';
+        }
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 10);
+
+        function cleanup(result) {
+            box.classList.remove('scale-100');
+            box.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 100);
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+            resolve(result);
+        }
+
+        okBtn.onclick = () => cleanup(true);
+        cancelBtn.onclick = () => cleanup(false);
+    });
+}
+
 function copyText(text, successMsg = 'Tautan berhasil disalin!') {
     navigator.clipboard.writeText(text).then(() => showToast(successMsg)).catch(() => {
         // Fallback jika clipboard API terhalang
@@ -178,6 +236,16 @@ async function handleLogin(e) {
 
 
 async function handleLogout() {
+    const confirmed = await showConfirmModal({
+        title: 'Konfirmasi Keluar',
+        message: 'Apakah Anda yakin ingin keluar dari Portal Shorten Link Transmigrasi?',
+        icon: 'fa-solid fa-arrow-right-from-bracket',
+        okText: 'Ya, Keluar',
+        cancelText: 'Batal',
+        isDanger: true
+    });
+    if (!confirmed) return;
+
     await api('/api/logout', { method: 'POST' });
     currentUser = null;
     showAuthScreen();
@@ -882,7 +950,15 @@ function closeRedirectModal() {
 }
 
 async function deleteLink(code) {
-    if (!confirm(`Hapus tautan pendek "/${code}"? Tautan ini tidak akan bisa diakses lagi.`)) return;
+    const confirmed = await showConfirmModal({
+        title: 'Hapus Tautan Pendek',
+        message: `Apakah Anda yakin ingin menghapus tautan pendek "/${code}"? Tautan ini tidak akan bisa diakses lagi oleh siapapun.`,
+        icon: 'fa-solid fa-trash-can',
+        okText: 'Hapus Tautan',
+        cancelText: 'Batal',
+        isDanger: true
+    });
+    if (!confirmed) return;
 
     try {
         const { ok, data } = await api(`/api/links?code=${encodeURIComponent(code)}`, { method: 'DELETE' });
@@ -1156,9 +1232,19 @@ async function handleSaveResetPassword(e) {
 
 async function toggleUserStatus(username, currentStatus) {
     const newStatus = currentStatus === 'inactive' ? 'active' : 'inactive';
-    const actionText = newStatus === 'active' ? 'mengaktifkan' : 'menonaktifkan';
+    const isDeactivating = newStatus === 'inactive';
 
-    if (!confirm(`Konfirmasi ${actionText} akun "${username}"?`)) return;
+    const confirmed = await showConfirmModal({
+        title: isDeactivating ? 'Nonaktifkan Akun Pengguna' : 'Aktifkan Akun Pengguna',
+        message: isDeactivating 
+            ? `Apakah Anda yakin ingin menonaktifkan akun "${username}"? Pengguna ini tidak akan bisa login sampai diaktifkan kembali.`
+            : `Aktifkan kembali akun "${username}" agar pengguna dapat login dan mengelola tautan?`,
+        icon: isDeactivating ? 'fa-solid fa-user-slash' : 'fa-solid fa-user-check',
+        okText: isDeactivating ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan',
+        cancelText: 'Batal',
+        isDanger: isDeactivating
+    });
+    if (!confirmed) return;
 
     try {
         const { ok, data } = await api('/api/admin/update-user', {
@@ -1175,7 +1261,15 @@ async function toggleUserStatus(username, currentStatus) {
 }
 
 async function deleteUser(username) {
-    if (!confirm(`Hapus permanen akun "${username}"? Akun ini tidak akan bisa login lagi.`)) return;
+    const confirmed = await showConfirmModal({
+        title: 'Hapus Akun Pengguna',
+        message: `Hapus permanen akun "${username}"? Semua data akun ini akan dihapus dan tidak bisa login lagi.`,
+        icon: 'fa-solid fa-user-xmark',
+        okText: 'Hapus Permanen',
+        cancelText: 'Batal',
+        isDanger: true
+    });
+    if (!confirmed) return;
 
     try {
         const { ok, data } = await api('/api/admin/delete-user', { method: 'POST', body: { username } });

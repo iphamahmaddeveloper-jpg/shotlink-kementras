@@ -852,6 +852,28 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL KONFIRMASI MODERN (MONOCHROME) ==================== -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 transition-all duration-200">
+        <div id="confirm-modal-box" class="bg-white rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-slate-200 text-center transform transition-all duration-200 scale-95">
+            <!-- Icon Badge (Monochrome) -->
+            <div id="confirm-icon-wrap" class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-800 flex items-center justify-center mx-auto mb-4 text-xl border border-slate-200 shadow-xs">
+                <i id="confirm-icon" class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            
+            <h3 id="confirm-title" class="text-base font-extrabold text-slate-900 mb-1.5 leading-snug">Konfirmasi Tindakan</h3>
+            <p id="confirm-message" class="text-xs text-slate-500 mb-6 leading-relaxed font-normal">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
+            
+            <div class="grid grid-cols-2 gap-2.5">
+                <button type="button" id="confirm-cancel-btn" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition active:scale-95">
+                    Batal
+                </button>
+                <button type="button" id="confirm-ok-btn" class="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-black border border-slate-800 transition shadow-sm active:scale-95">
+                    Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== TOAST NOTIFIKASI ==================== -->
     <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
         <div class="bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs font-semibold border border-slate-700">
